@@ -3,7 +3,7 @@ import { CodeEditor } from "@/components/CodeEditor";
 import { PromptInput } from "@/components/PromptInput";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import { MessageSquarePlus, Cpu, Cloud, Lock, Zap } from "lucide-react";
+import { MessageSquarePlus, Cpu, Cloud, Lock, Zap, Github, Code2, Workflow, GitBranch, Terminal } from "lucide-react";
 
 const Index = () => {
   const [prompt, setPrompt] = useState("");
@@ -90,48 +90,175 @@ resource "aws_subnet" "public" {
 
   if (!showGenerator) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 animate-fade-in">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
-            AI-Powered Infrastructure as Code
-          </h1>
-          
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Generate, validate, and optimize your infrastructure code using advanced AI. Support for Terraform, Kubernetes, Docker, and more.
-          </p>
+      <div className="min-h-screen bg-background flex flex-col">
+        {/* Header */}
+        <header className="border-b border-border/40 backdrop-blur-sm fixed w-full z-50 top-0">
+          <div className="container flex h-16 items-center justify-between py-4">
+            <div className="flex items-center space-x-2">
+              <Terminal className="h-6 w-6 text-primary" />
+              <span className="font-bold text-xl">IaCGPT</span>
+            </div>
+            <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+              <a href="#features" className="text-foreground/60 hover:text-foreground transition-colors">Features</a>
+              <a href="#benefits" className="text-foreground/60 hover:text-foreground transition-colors">Benefits</a>
+              <a href="#examples" className="text-foreground/60 hover:text-foreground transition-colors">Examples</a>
+              <Button variant="secondary" size="sm" onClick={() => setShowGenerator(true)}>
+                Launch App
+              </Button>
+            </nav>
+          </div>
+        </header>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
-            <div className="p-6 bg-secondary/50 rounded-lg">
-              <Cpu className="w-8 h-8 text-primary mb-4" />
-              <h3 className="font-semibold mb-2">Smart Generation</h3>
-              <p className="text-sm text-muted-foreground">Generate IaC from natural language descriptions</p>
+        <main className="flex-1">
+          {/* Hero Section */}
+          <section className="pt-24 pb-12">
+            <div className="container flex flex-col items-center text-center space-y-8">
+              <h1 className="text-6xl font-bold bg-gradient-to-r from-primary via-purple-400 to-blue-400 bg-clip-text text-transparent max-w-3xl leading-tight">
+                AI-Powered Infrastructure as Code Generator
+              </h1>
+              <p className="text-xl text-muted-foreground max-w-2xl">
+                Transform natural language into production-ready infrastructure code. Support for Terraform, Kubernetes, Docker, and more.
+              </p>
+              <div className="flex gap-4">
+                <Button size="lg" onClick={() => setShowGenerator(true)}>
+                  <MessageSquarePlus className="mr-2" />
+                  Start Generating
+                </Button>
+                <Button size="lg" variant="outline">
+                  <Github className="mr-2" />
+                  View on GitHub
+                </Button>
+              </div>
             </div>
-            <div className="p-6 bg-secondary/50 rounded-lg">
-              <Cloud className="w-8 h-8 text-primary mb-4" />
-              <h3 className="font-semibold mb-2">Multi-Cloud</h3>
-              <p className="text-sm text-muted-foreground">Support for all major cloud providers</p>
+          </section>
+
+          {/* Features Grid */}
+          <section id="features" className="py-20 bg-secondary/20">
+            <div className="container">
+              <h2 className="text-3xl font-bold text-center mb-12">Powerful Features</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="p-6 bg-secondary/50 rounded-lg backdrop-blur-sm border border-border/50">
+                  <Cpu className="w-8 h-8 text-primary mb-4" />
+                  <h3 className="font-semibold mb-2">Smart Generation</h3>
+                  <p className="text-sm text-muted-foreground">Generate IaC from natural language descriptions</p>
+                </div>
+                <div className="p-6 bg-secondary/50 rounded-lg backdrop-blur-sm border border-border/50">
+                  <Cloud className="w-8 h-8 text-primary mb-4" />
+                  <h3 className="font-semibold mb-2">Multi-Cloud</h3>
+                  <p className="text-sm text-muted-foreground">Support for all major cloud providers</p>
+                </div>
+                <div className="p-6 bg-secondary/50 rounded-lg backdrop-blur-sm border border-border/50">
+                  <Lock className="w-8 h-8 text-primary mb-4" />
+                  <h3 className="font-semibold mb-2">Security First</h3>
+                  <p className="text-sm text-muted-foreground">Built-in security and compliance checks</p>
+                </div>
+                <div className="p-6 bg-secondary/50 rounded-lg backdrop-blur-sm border border-border/50">
+                  <Zap className="w-8 h-8 text-primary mb-4" />
+                  <h3 className="font-semibold mb-2">Instant Deploy</h3>
+                  <p className="text-sm text-muted-foreground">Deploy your infrastructure in minutes</p>
+                </div>
+              </div>
             </div>
-            <div className="p-6 bg-secondary/50 rounded-lg">
-              <Lock className="w-8 h-8 text-primary mb-4" />
-              <h3 className="font-semibold mb-2">Security First</h3>
-              <p className="text-sm text-muted-foreground">Built-in security and compliance checks</p>
+          </section>
+
+          {/* Benefits Section */}
+          <section id="benefits" className="py-20">
+            <div className="container">
+              <h2 className="text-3xl font-bold text-center mb-12">Why Choose IaCGPT?</h2>
+              <div className="grid md:grid-cols-3 gap-8">
+                <div className="space-y-4">
+                  <Code2 className="w-8 h-8 text-primary" />
+                  <h3 className="text-xl font-semibold">Code Quality</h3>
+                  <p className="text-muted-foreground">Generate high-quality, maintainable infrastructure code following best practices.</p>
+                </div>
+                <div className="space-y-4">
+                  <Workflow className="w-8 h-8 text-primary" />
+                  <h3 className="text-xl font-semibold">Workflow Integration</h3>
+                  <p className="text-muted-foreground">Seamlessly integrate with your existing CI/CD pipelines and development workflow.</p>
+                </div>
+                <div className="space-y-4">
+                  <GitBranch className="w-8 h-8 text-primary" />
+                  <h3 className="text-xl font-semibold">Version Control</h3>
+                  <p className="text-muted-foreground">Built-in support for version control and collaboration features.</p>
+                </div>
+              </div>
             </div>
-            <div className="p-6 bg-secondary/50 rounded-lg">
-              <Zap className="w-8 h-8 text-primary mb-4" />
-              <h3 className="font-semibold mb-2">Instant Deploy</h3>
-              <p className="text-sm text-muted-foreground">Deploy your infrastructure in minutes</p>
+          </section>
+
+          {/* Examples Section */}
+          <section id="examples" className="py-20 bg-secondary/20">
+            <div className="container">
+              <h2 className="text-3xl font-bold text-center mb-12">See It In Action</h2>
+              <div className="max-w-3xl mx-auto p-6 bg-background rounded-lg border border-border/50">
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">Input:</p>
+                  <div className="p-4 bg-secondary rounded-md">
+                    "Create a highly available web application on AWS with auto-scaling"
+                  </div>
+                  <p className="text-sm text-muted-foreground">Generated Terraform:</p>
+                  <pre className="p-4 bg-secondary rounded-md overflow-x-auto">
+                    <code>{`resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+  
+  tags = {
+    Name = "Main VPC"
+  }
+}`}</code>
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        {/* Footer */}
+        <footer className="border-t border-border/40">
+          <div className="container py-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              <div>
+                <h4 className="font-semibold mb-4">Product</h4>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li><a href="#" className="hover:text-foreground">Features</a></li>
+                  <li><a href="#" className="hover:text-foreground">Documentation</a></li>
+                  <li><a href="#" className="hover:text-foreground">Pricing</a></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-4">Company</h4>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li><a href="#" className="hover:text-foreground">About</a></li>
+                  <li><a href="#" className="hover:text-foreground">Blog</a></li>
+                  <li><a href="#" className="hover:text-foreground">Careers</a></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-4">Resources</h4>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li><a href="#" className="hover:text-foreground">Community</a></li>
+                  <li><a href="#" className="hover:text-foreground">Help Center</a></li>
+                  <li><a href="#" className="hover:text-foreground">Status</a></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-4">Legal</h4>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li><a href="#" className="hover:text-foreground">Privacy</a></li>
+                  <li><a href="#" className="hover:text-foreground">Terms</a></li>
+                  <li><a href="#" className="hover:text-foreground">Security</a></li>
+                </ul>
+              </div>
+            </div>
+            <div className="mt-8 pt-8 border-t border-border/40 flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="flex items-center space-x-2">
+                <Terminal className="h-5 w-5 text-primary" />
+                <span className="font-semibold">IaCGPT</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                © 2024 IaCGPT. All rights reserved.
+              </p>
             </div>
           </div>
-
-          <Button 
-            size="lg" 
-            className="mt-12"
-            onClick={() => setShowGenerator(true)}
-          >
-            <MessageSquarePlus className="mr-2" />
-            Start Generating IaC
-          </Button>
-        </div>
+        </footer>
       </div>
     );
   }
