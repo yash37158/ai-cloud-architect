@@ -13,12 +13,21 @@ import {
 
 interface PromptInputProps {
   value: string;
+  configType: string;
   onChange: (value: string) => void;
+  onConfigTypeChange: (value: string) => void;
   onGenerate: () => void;
   isLoading?: boolean;
 }
 
-export function PromptInput({ value, onChange, onGenerate, isLoading }: PromptInputProps) {
+export function PromptInput({
+  value,
+  configType,
+  onChange,
+  onConfigTypeChange,
+  onGenerate,
+  isLoading
+}: PromptInputProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onGenerate();
@@ -27,7 +36,7 @@ export function PromptInput({ value, onChange, onGenerate, isLoading }: PromptIn
   return (
     <Card className="p-4 bg-secondary/50">
       <form onSubmit={handleSubmit} className="flex gap-2">
-        <Select defaultValue="terraform">
+        <Select value={configType} onValueChange={onConfigTypeChange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select type" />
           </SelectTrigger>
@@ -41,7 +50,7 @@ export function PromptInput({ value, onChange, onGenerate, isLoading }: PromptIn
         </Select>
         <Input
           className="flex-1"
-          placeholder="Describe your infrastructure needs (e.g., 'Create a 3-tier architecture on AWS')"
+          placeholder="Describe your infrastructure needs (e.g., 'Create a web application with load balancer')"
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />
