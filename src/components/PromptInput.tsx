@@ -3,6 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Wand2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface PromptInputProps {
   value: string;
@@ -20,6 +27,18 @@ export function PromptInput({ value, onChange, onGenerate, isLoading }: PromptIn
   return (
     <Card className="p-4 bg-secondary/50">
       <form onSubmit={handleSubmit} className="flex gap-2">
+        <Select defaultValue="terraform">
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="terraform">Terraform</SelectItem>
+            <SelectItem value="docker">Dockerfile</SelectItem>
+            <SelectItem value="kubernetes">Kubernetes</SelectItem>
+            <SelectItem value="cloudformation">CloudFormation</SelectItem>
+            <SelectItem value="ansible">Ansible</SelectItem>
+          </SelectContent>
+        </Select>
         <Input
           className="flex-1"
           placeholder="Describe your infrastructure needs (e.g., 'Create a 3-tier architecture on AWS')"

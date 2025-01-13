@@ -7,6 +7,7 @@ const Index = () => {
   const [prompt, setPrompt] = useState("");
   const [code, setCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [configType, setConfigType] = useState("terraform");
   const { toast } = useToast();
 
   const handleGenerate = async () => {
@@ -23,7 +24,40 @@ const Index = () => {
     // TODO: Integrate with actual AI service
     // For now, we'll simulate a response
     setTimeout(() => {
-      setCode(`# Generated Terraform configuration for: ${prompt}
+      let sampleCode = "";
+      switch (configType) {
+        case "docker":
+          sampleCode = `FROM node:16-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+EXPOSE 3000
+CMD ["npm", "start"]`;
+          break;
+        case "kubernetes":
+          sampleCode = `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sample-app
+  template:
+    metadata:
+      labels:
+        app: sample-app
+    spec:
+      containers:
+      - name: sample-app
+        image: sample-app:latest
+        ports:
+        - containerPort: 3000`;
+          break;
+        default:
+          sampleCode = `# Generated Terraform configuration for: ${prompt}
       
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
@@ -40,7 +74,9 @@ resource "aws_subnet" "public" {
   tags = {
     Name = "Public Subnet"
   }
-}`);
+}`;
+      }
+      setCode(sampleCode);
       setIsLoading(false);
       toast({
         title: "Infrastructure code generated",
