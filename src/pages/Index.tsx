@@ -4,6 +4,7 @@ import { PromptInput } from "@/components/PromptInput";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { MessageSquarePlus, Cpu, Cloud, Lock, Zap, Github, Code2, Workflow, GitBranch, Terminal } from "lucide-react";
+import { generateInfrastructureCode } from "@/utils/infrastructureUtils";
 
 const Index = () => {
   const [prompt, setPrompt] = useState("");
@@ -234,6 +235,8 @@ const Index = () => {
           onChange={setPrompt}
           onGenerate={handleGenerate}
           isLoading={isLoading}
+          configType={configType}
+          onConfigTypeChange={setConfigType}
         />
 
         <div className="h-[600px]">
