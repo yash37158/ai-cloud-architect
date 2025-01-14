@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { CodeEditor } from "@/components/CodeEditor";
 import { PromptInput } from "@/components/PromptInput";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { GitHubConfig } from "@/components/GitHubConfig";
 import { WorkflowConfig } from "@/components/WorkflowConfig";
 import { generateInfrastructureCode } from "@/utils/infrastructureUtils";
@@ -15,7 +15,8 @@ import {
   Lock,
   Zap,
   Code2,
-  GitBranch
+  GitBranch,
+  Workflow
 } from "lucide-react";
 
 const Index = () => {
