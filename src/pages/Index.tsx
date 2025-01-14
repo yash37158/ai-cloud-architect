@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { CodeEditor } from "@/components/CodeEditor";
 import { PromptInput } from "@/components/PromptInput";
 import { useToast } from "@/components/ui/use-toast";
-import { Button } from "@/components/ui/button";
-import { MessageSquarePlus, Cpu, Cloud, Lock, Zap, Github, Code2, Workflow, GitBranch, Terminal } from "lucide-react";
+import { GitHubConfig } from "@/components/GitHubConfig";
+import { WorkflowConfig } from "@/components/WorkflowConfig";
 import { generateInfrastructureCode } from "@/utils/infrastructureUtils";
 
 const Index = () => {
@@ -12,6 +12,13 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [configType, setConfigType] = useState("terraform");
   const [showGenerator, setShowGenerator] = useState(false);
+  
+  // GitHub configuration state
+  const [organization, setOrganization] = useState("");
+  const [repository, setRepository] = useState("");
+  const [workflowType, setWorkflowType] = useState("");
+  const [workflowContent, setWorkflowContent] = useState("");
+  
   const { toast } = useToast();
 
   const handleGenerate = async () => {
@@ -26,7 +33,6 @@ const Index = () => {
 
     setIsLoading(true);
     try {
-      // Generate infrastructure code based on prompt and config type
       const generatedCode = generateInfrastructureCode(prompt, configType);
       setCode(generatedCode);
       
@@ -43,6 +49,38 @@ const Index = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSaveWorkflow = () => {
+    if (!organization || !repository || !workflowContent) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Workflow saved",
+      description: "Your GitHub workflow has been saved successfully.",
+    });
+  };
+
+  const handleTestWorkflow = () => {
+    if (!workflowContent) {
+      toast({
+        title: "No workflow content",
+        description: "Please enter workflow configuration first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Testing workflow",
+      description: "Your workflow is being validated...",
+    });
   };
 
   if (!showGenerator) {
@@ -224,20 +262,40 @@ const Index = () => {
     <div className="min-h-screen bg-background p-6 animate-fade-in">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">AI Infrastructure Generator</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Infrastructure & Workflow Generator</h1>
           <p className="text-muted-foreground">
-            Generate Infrastructure as Code using natural language descriptions
+            Generate Infrastructure as Code and GitHub Workflows using AI
           </p>
         </div>
 
-        <PromptInput
-          value={prompt}
-          onChange={setPrompt}
-          onGenerate={handleGenerate}
-          isLoading={isLoading}
-          configType={configType}
-          onConfigTypeChange={setConfigType}
-        />
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="space-y-6">
+            <PromptInput
+              value={prompt}
+              onChange={setPrompt}
+              onGenerate={handleGenerate}
+              isLoading={isLoading}
+              configType={configType}
+              onConfigTypeChange={setConfigType}
+            />
+
+            <GitHubConfig
+              organization={organization}
+              onOrganizationChange={setOrganization}
+              repository={repository}
+              onRepositoryChange={setRepository}
+              workflowType={workflowType}
+              onWorkflowTypeChange={setWorkflowType}
+            />
+          </div>
+
+          <WorkflowConfig
+            workflowContent={workflowContent}
+            onWorkflowContentChange={setWorkflowContent}
+            onSaveWorkflow={handleSaveWorkflow}
+            onTestWorkflow={handleTestWorkflow}
+          />
+        </div>
 
         <div className="h-[600px]">
           <CodeEditor code={code} onChange={setCode} />

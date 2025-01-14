@@ -151,3 +151,86 @@ export const generateInfrastructureCode = (prompt: string, configType: string): 
   console.log(`Found matching template with score ${bestMatch.score}`);
   return bestMatch.template.configuration;
 };
+
+// Add new GitHub workflow templates
+const workflowTemplates = {
+  ci: `name: CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+    - name: Install dependencies
+      run: npm ci
+    - name: Run tests
+      run: npm test`,
+
+  cd: `name: CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Deploy to production
+      run: echo "Add your deployment steps here"`,
+
+  infrastructure: `name: Infrastructure Deployment
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+    - 'infrastructure/**'
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+    - name: Terraform Init
+      run: terraform init
+    - name: Terraform Plan
+      run: terraform plan
+    - name: Terraform Apply
+      run: terraform apply -auto-approve`,
+
+  security: `name: Security Scan
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  push:
+    branches: [ main ]
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run security scan
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: \${{ secrets.SNYK_TOKEN }}`
+};
+
+export const generateWorkflowTemplate = (type: string): string => {
+  return workflowTemplates[type as keyof typeof workflowTemplates] || '';
+};
