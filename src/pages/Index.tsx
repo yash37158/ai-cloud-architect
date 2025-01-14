@@ -5,6 +5,18 @@ import { useToast } from "@/components/ui/use-toast";
 import { GitHubConfig } from "@/components/GitHubConfig";
 import { WorkflowConfig } from "@/components/WorkflowConfig";
 import { generateInfrastructureCode } from "@/utils/infrastructureUtils";
+import { Button } from "@/components/ui/button";
+import { 
+  Terminal,
+  MessageSquarePlus,
+  Github,
+  Cpu,
+  Cloud,
+  Lock,
+  Zap,
+  Code2,
+  GitBranch
+} from "lucide-react";
 
 const Index = () => {
   const [prompt, setPrompt] = useState("");
