@@ -6,6 +6,7 @@ import { GitHubConfig } from "@/components/GitHubConfig";
 import { WorkflowConfig } from "@/components/WorkflowConfig";
 import { generateInfrastructureCode } from "@/utils/infrastructureUtils";
 import { Button } from "@/components/ui/button";
+import { AuthScreen } from "@/components/AuthScreen";
 import { 
   Terminal,
   MessageSquarePlus,
@@ -25,6 +26,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [configType, setConfigType] = useState("terraform");
   const [showGenerator, setShowGenerator] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   // GitHub configuration state
   const [organization, setOrganization] = useState("");
@@ -95,6 +97,11 @@ const Index = () => {
       description: "Your workflow is being validated...",
     });
   };
+
+  // Show auth screen if user clicks "Launch App" but isn't authenticated
+  if (showGenerator && !isAuthenticated) {
+    return <AuthScreen onAuth={() => setIsAuthenticated(true)} />;
+  }
 
   if (!showGenerator) {
     return (
