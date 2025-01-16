@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Github } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { githubAuth } from "@/services/githubAuth";
 
 interface AuthScreenProps {
   onAuth: () => void;
@@ -11,13 +12,16 @@ interface AuthScreenProps {
 export function AuthScreen({ onAuth }: AuthScreenProps) {
   const { toast } = useToast();
 
-  const handleGithubAuth = () => {
-    // In a real app, this would integrate with GitHub OAuth
-    toast({
-      title: "Authentication Success",
-      description: "Successfully authenticated with GitHub",
-    });
-    onAuth();
+  const handleGithubAuth = async () => {
+    try {
+      githubAuth.login();
+    } catch (error) {
+      toast({
+        title: "Authentication Error",
+        description: "Failed to initiate GitHub authentication",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -26,10 +30,11 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
         <CardHeader>
           <CardTitle>Authentication Required</CardTitle>
           <CardDescription>
-            Please authenticate with GitHub to continue using the application
+            Please authenticate with GitHub to continue using the application.
+            This will allow us to manage your repositories and workflows.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <Button 
             onClick={handleGithubAuth} 
             className="w-full"
@@ -38,6 +43,9 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
             <Github className="mr-2 h-4 w-4" />
             Continue with GitHub
           </Button>
+          <p className="text-sm text-muted-foreground text-center">
+            We'll only request the permissions needed to manage your repositories and workflows.
+          </p>
         </CardContent>
       </Card>
     </div>
