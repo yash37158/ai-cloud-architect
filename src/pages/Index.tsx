@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { CodeEditor } from "@/components/CodeEditor";
 import { PromptInput } from "@/components/PromptInput";
@@ -219,53 +220,9 @@ const Index = () => {
           </section>
         </main>
 
-        {/* Footer */}
-        <footer className="border-t border-border/40">
-          <div className="container py-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              <div>
-                <h4 className="font-semibold mb-4">Product</h4>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li><a href="#" className="hover:text-foreground">Features</a></li>
-                  <li><a href="#" className="hover:text-foreground">Documentation</a></li>
-                  <li><a href="#" className="hover:text-foreground">Pricing</a></li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">Company</h4>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li><a href="#" className="hover:text-foreground">About</a></li>
-                  <li><a href="#" className="hover:text-foreground">Blog</a></li>
-                  <li><a href="#" className="hover:text-foreground">Careers</a></li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">Resources</h4>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li><a href="#" className="hover:text-foreground">Community</a></li>
-                  <li><a href="#" className="hover:text-foreground">Help Center</a></li>
-                  <li><a href="#" className="hover:text-foreground">Status</a></li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">Legal</h4>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li><a href="#" className="hover:text-foreground">Privacy</a></li>
-                  <li><a href="#" className="hover:text-foreground">Terms</a></li>
-                  <li><a href="#" className="hover:text-foreground">Security</a></li>
-                </ul>
-              </div>
-            </div>
-            <div className="mt-8 pt-8 border-t border-border/40 flex flex-col md:flex-row justify-between items-center gap-4">
-              <div className="flex items-center space-x-2">
-                <Terminal className="h-5 w-5 text-primary" />
-                <span className="font-semibold">IaCGPT</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                © 2024 IaCGPT. All rights reserved.
-              </p>
-            </div>
-          </div>
+        {/* Simple footer with attribution */}
+        <footer className="border-t border-border/40 py-4 text-center text-sm text-muted-foreground">
+          Made by Yash Sharma
         </footer>
       </div>
     );
@@ -312,6 +269,11 @@ const Index = () => {
 
         <div className="h-[600px]">
           <CodeEditor code={code} onChange={setCode} />
+        </div>
+        
+        {/* Add a simple attribution in the app view too */}
+        <div className="text-center text-sm text-muted-foreground pt-4">
+          Made by Yash Sharma
         </div>
       </div>
     </div>
