@@ -5,7 +5,8 @@ import { PromptInput } from "@/components/PromptInput";
 import { useToast } from "@/hooks/use-toast";
 import { GitHubConfig } from "@/components/GitHubConfig";
 import { WorkflowConfig } from "@/components/WorkflowConfig";
-import { generateInfrastructureCode } from "@/utils/infrastructureUtils";
+import { AISettings } from "@/components/AISettings";
+import { generateInfrastructureCodeSmart } from "@/utils/generation";
 import { Button } from "@/components/ui/button";
 import { 
   Terminal,
@@ -47,7 +48,7 @@ const Index = () => {
 
     setIsLoading(true);
     try {
-      const generatedCode = generateInfrastructureCode(prompt, configType);
+      const generatedCode = await generateInfrastructureCodeSmart(prompt, configType);
       setCode(generatedCode);
       
       toast({
@@ -248,7 +249,8 @@ const Index = () => {
               configType={configType}
               onConfigTypeChange={setConfigType}
             />
-
+            <AISettings />
+            
             <GitHubConfig
               organization={organization}
               onOrganizationChange={setOrganization}
