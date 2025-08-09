@@ -108,42 +108,147 @@ spec:
 };
 
 export const generateInfrastructureCode = (prompt: string, configType: string): string => {
-  // Convert prompt to lowercase for better matching
   const promptLower = prompt.toLowerCase();
-  
-  // Extract key terms from the prompt
-  const terms = promptLower.split(' ').filter(term => 
-    term.length > 3 && 
-    !['the', 'and', 'for', 'with'].includes(term)
+
+  // Fast-path: common web app/dashboard architecture for Terraform
+  if (
+    configType === 'terraform' && /(dashboard|web app|webapp|frontend|spa)/.test(promptLower)
+  ) {
+    return `# Personal Finance Dashboard (Serverless) on AWS
+# S3 for static frontend, API Gateway + Lambda for backend, DynamoDB for data
+
+resource "random_id" "suffix" {
+  byte_length = 4
+}
+
+resource "aws_s3_bucket" "site" {
+  bucket = "personal-finance-dashboard-${'${'}random_id.suffix.hex${'}'}"
+  force_destroy = true
+  tags = { Project = "personal-finance-dashboard" }
+}
+
+resource "aws_s3_bucket_website_configuration" "site" {
+  bucket = aws_s3_bucket.site.id
+  index_document { suffix = "index.html" }
+  error_document { key = "index.html" }
+}
+
+resource "aws_dynamodb_table" "transactions" {
+  name         = "pf_transactions"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "user_id"
+  range_key    = "tx_id"
+
+  attribute { name = "user_id" type = "S" }
+  attribute { name = "tx_id"  type = "S" }
+  tags = { Project = "personal-finance-dashboard" }
+}
+
+resource "aws_iam_role" "lambda_exec" {
+  name = "pf_lambda_exec"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Action = "sts:AssumeRole",
+      Effect = "Allow",
+      Principal = { Service = "lambda.amazonaws.com" }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_basic" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_lambda_function" "api" {
+  function_name = "pf_backend"
+  role          = aws_iam_role.lambda_exec.arn
+  handler       = "index.handler"
+  runtime       = "nodejs18.x"
+  filename      = "function.zip"  # Upload your zipped code
+  source_code_hash = filebase64sha256("function.zip")
+  environment { variables = { TABLE_NAME = aws_dynamodb_table.transactions.name } }
+}
+
+resource "aws_api_gateway_rest_api" "api" {
+  name        = "pf-api"
+  description = "Personal Finance API"
+}
+
+resource "aws_api_gateway_resource" "items" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
+  path_part   = "transactions"
+}
+
+resource "aws_api_gateway_method" "get_items" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.items.id
+  http_method   = "GET"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "get_items" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  resource_id = aws_api_gateway_resource.items.id
+  http_method = aws_api_gateway_method.get_items.http_method
+  type        = "AWS_PROXY"
+  integration_http_method = "POST"
+  uri         = aws_lambda_function.api.invoke_arn
+}
+
+resource "aws_lambda_permission" "apigw" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.api.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${'${'}aws_api_gateway_rest_api.api.execution_arn${'}'}/*/*"
+}
+
+resource "aws_api_gateway_deployment" "api" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  depends_on  = [aws_api_gateway_integration.get_items]
+}
+
+resource "aws_api_gateway_stage" "prod" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  deployment_id = aws_api_gateway_deployment.api.id
+  stage_name    = "prod"
+}
+
+output "website_bucket" {
+  value = aws_s3_bucket.site.bucket
+}
+
+output "api_url" {
+  value = "${'${'}aws_api_gateway_rest_api.api.execution_arn${'}'}/prod"
+}`;
+  }
+
+  // Existing heuristic/template-based selection
+  const terms = promptLower.split(' ').filter(term =>
+    term.length > 3 && !['the', 'and', 'for', 'with'].includes(term)
   );
 
-  // Get available templates for the selected config type
   const availableTemplates = templates[configType] || [];
-  
   if (availableTemplates.length === 0) {
     return "// No templates available for the selected configuration type";
   }
 
-  // Score each template based on matching terms
   const scoredTemplates = availableTemplates.map(template => {
     let score = 0;
     const templateString = JSON.stringify(template).toLowerCase();
-    
     terms.forEach(term => {
       if (templateString.includes(term)) score += 1;
-      // Give extra weight to provider matches
       if (template.provider.toLowerCase().includes(term)) score += 2;
       if (template.resourceType.toLowerCase().includes(term)) score += 2;
     });
-    
     return { template, score };
   });
 
-  // Sort by score and get the best match
   const bestMatch = scoredTemplates.sort((a, b) => b.score - a.score)[0];
-
-  // If no good matches found, return the first template as default
-  if (bestMatch.score === 0) {
+  if (!bestMatch || bestMatch.score === 0) {
     console.log("No exact matches found, using default template");
     return availableTemplates[0].configuration;
   }

@@ -9,7 +9,7 @@ export async function aiGenerateIaC(prompt: string, configType: string): Promise
   }
 
   // Use a more reliable and widely available model
-  const model = "microsoft/DialoGPT-medium";
+  const model = "bigcode/starcoder2-3b";
 
   // Build a simpler, more direct prompt
   const systemPrompt = `Generate ${configType} configuration code for: ${prompt}`;
@@ -26,10 +26,13 @@ export async function aiGenerateIaC(prompt: string, configType: string): Promise
       body: JSON.stringify({
         inputs: systemPrompt,
         parameters: {
-          max_length: 500,
-          temperature: 0.3,
+          max_new_tokens: 400,
+          temperature: 0.2,
+          top_p: 0.95,
           do_sample: true,
+          return_full_text: false,
         },
+        options: { wait_for_model: true },
       }),
     });
 
@@ -77,7 +80,7 @@ export async function aiGenerateIaC(prompt: string, configType: string): Promise
 
 async function tryAlternativeModel(prompt: string, configType: string, apiToken: string): Promise<string | null> {
   // Try a simpler, more reliable model
-  const alternativeModel = "gpt2";
+  const alternativeModel = "TinyLlama/TinyLlama-1.1B-Chat-v1.0";
   
   try {
     console.log(`Trying alternative model: ${alternativeModel}`);
@@ -91,10 +94,13 @@ async function tryAlternativeModel(prompt: string, configType: string, apiToken:
       body: JSON.stringify({
         inputs: `# ${configType} configuration for ${prompt}\n`,
         parameters: {
-          max_length: 300,
-          temperature: 0.7,
+          max_new_tokens: 350,
+          temperature: 0.4,
+          top_p: 0.95,
           do_sample: true,
+          return_full_text: false,
         },
+        options: { wait_for_model: true },
       }),
     });
 
