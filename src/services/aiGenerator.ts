@@ -7,7 +7,7 @@ export async function aiGenerateIaC(prompt: string, configType: string): Promise
 
   // Choose a widely available instruction model suitable for code
   // Feel free to change this model in the UI or here if needed
-  const model = "HuggingFaceH4/zephyr-7b-beta";
+  const model = "mistralai/Mistral-7B-Instruct-v0.2";
 
   // Build a strict prompt to return ONLY code for the requested IaC type
   const system = `You are an expert Infrastructure-as-Code generator.\n` +
