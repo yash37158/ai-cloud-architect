@@ -10,6 +10,17 @@
   </head>
 
   <body>
+    <!-- Redirect script for lovable.app → netlify.app -->
+    <script>
+    (function () {
+      var newHost = 'ai-cloud-architect.netlify.app';
+      if (location.hostname.includes('lovable.app')) {
+        var target = 'https://' + newHost + location.pathname + location.search + location.hash;
+        location.replace(target);
+      }
+    })();
+    </script>
+    
     <div id="root"></div>
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
