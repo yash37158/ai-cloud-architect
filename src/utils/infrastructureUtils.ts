@@ -1,9 +1,13 @@
-interface InfrastructureTemplate {
+import { aiService } from "@/services/aiService";
+import { configService } from "@/services/configService";
+
+export interface InfrastructureTemplate {
   provider: string;
   resourceType: string;
   configuration: string;
 }
 
+// Keep templates as fallback for offline mode
 const templates: Record<string, InfrastructureTemplate[]> = {
   terraform: [
     {
@@ -107,154 +111,75 @@ spec:
   ]
 };
 
-export const generateInfrastructureCode = (prompt: string, configType: string): string => {
-  const promptLower = prompt.toLowerCase();
-
-  // Fast-path: common web app/dashboard architecture for Terraform
-  if (
-    configType === 'terraform' && /(dashboard|web app|webapp|frontend|spa)/.test(promptLower)
-  ) {
-    return `# Personal Finance Dashboard (Serverless) on AWS
-# S3 for static frontend, API Gateway + Lambda for backend, DynamoDB for data
-
-resource "random_id" "suffix" {
-  byte_length = 4
-}
-
-resource "aws_s3_bucket" "site" {
-  bucket = "personal-finance-dashboard-${'${'}random_id.suffix.hex${'}'}"
-  force_destroy = true
-  tags = { Project = "personal-finance-dashboard" }
-}
-
-resource "aws_s3_bucket_website_configuration" "site" {
-  bucket = aws_s3_bucket.site.id
-  index_document { suffix = "index.html" }
-  error_document { key = "index.html" }
-}
-
-resource "aws_dynamodb_table" "transactions" {
-  name         = "pf_transactions"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "user_id"
-  range_key    = "tx_id"
-
-  attribute { name = "user_id" type = "S" }
-  attribute { name = "tx_id"  type = "S" }
-  tags = { Project = "personal-finance-dashboard" }
-}
-
-resource "aws_iam_role" "lambda_exec" {
-  name = "pf_lambda_exec"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Action = "sts:AssumeRole",
-      Effect = "Allow",
-      Principal = { Service = "lambda.amazonaws.com" }
-    }]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_basic" {
-  role       = aws_iam_role.lambda_exec.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
-resource "aws_lambda_function" "api" {
-  function_name = "pf_backend"
-  role          = aws_iam_role.lambda_exec.arn
-  handler       = "index.handler"
-  runtime       = "nodejs18.x"
-  filename      = "function.zip"  # Upload your zipped code
-  source_code_hash = filebase64sha256("function.zip")
-  environment { variables = { TABLE_NAME = aws_dynamodb_table.transactions.name } }
-}
-
-resource "aws_api_gateway_rest_api" "api" {
-  name        = "pf-api"
-  description = "Personal Finance API"
-}
-
-resource "aws_api_gateway_resource" "items" {
-  rest_api_id = aws_api_gateway_rest_api.api.id
-  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
-  path_part   = "transactions"
-}
-
-resource "aws_api_gateway_method" "get_items" {
-  rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.items.id
-  http_method   = "GET"
-  authorization = "NONE"
-}
-
-resource "aws_api_gateway_integration" "get_items" {
-  rest_api_id = aws_api_gateway_rest_api.api.id
-  resource_id = aws_api_gateway_resource.items.id
-  http_method = aws_api_gateway_method.get_items.http_method
-  type        = "AWS_PROXY"
-  integration_http_method = "POST"
-  uri         = aws_lambda_function.api.invoke_arn
-}
-
-resource "aws_lambda_permission" "apigw" {
-  statement_id  = "AllowAPIGatewayInvoke"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.api.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${'${'}aws_api_gateway_rest_api.api.execution_arn${'}'}/*/*"
-}
-
-resource "aws_api_gateway_deployment" "api" {
-  rest_api_id = aws_api_gateway_rest_api.api.id
-  depends_on  = [aws_api_gateway_integration.get_items]
-}
-
-resource "aws_api_gateway_stage" "prod" {
-  rest_api_id   = aws_api_gateway_rest_api.api.id
-  deployment_id = aws_api_gateway_deployment.api.id
-  stage_name    = "prod"
-}
-
-output "website_bucket" {
-  value = aws_s3_bucket.site.bucket
-}
-
-output "api_url" {
-  value = "${'${'}aws_api_gateway_rest_api.api.execution_arn${'}'}/prod"
-}`;
+export const generateInfrastructureCode = async (
+  prompt: string, 
+  configType: string
+): Promise<{ code: string; explanation: string; securityNotes: string[]; costEstimate?: string }> => {
+  const apiKey = configService.getApiKey();
+  
+  if (!apiKey) {
+    // Fallback to template-based generation with warning
+    return generateFromTemplates(prompt, configType);
   }
 
-  // Existing heuristic/template-based selection
-  const terms = promptLower.split(' ').filter(term =>
-    term.length > 3 && !['the', 'and', 'for', 'with'].includes(term)
+  try {
+    // Use real AI service
+    const result = await aiService.generateInfrastructureCode(prompt, configType);
+    return result;
+  } catch (error) {
+    // Fallback to templates if AI fails
+    return generateFromTemplates(prompt, configType);
+  }
+};
+
+const generateFromTemplates = (
+  prompt: string, 
+  configType: string
+): { code: string; explanation: string; securityNotes: string[]; costEstimate?: string } => {
+  const promptLower = prompt.toLowerCase();
+  const terms = promptLower.split(' ').filter(term => 
+    term.length > 3 && 
+    !['the', 'and', 'for', 'with'].includes(term)
   );
 
   const availableTemplates = templates[configType] || [];
+  
   if (availableTemplates.length === 0) {
-    return "// No templates available for the selected configuration type";
+    return {
+      code: "// No templates available for the selected configuration type",
+      explanation: "Template not found",
+      securityNotes: ["Please configure AI service for better results"]
+    };
   }
 
   const scoredTemplates = availableTemplates.map(template => {
     let score = 0;
     const templateString = JSON.stringify(template).toLowerCase();
+    
     terms.forEach(term => {
       if (templateString.includes(term)) score += 1;
       if (template.provider.toLowerCase().includes(term)) score += 2;
       if (template.resourceType.toLowerCase().includes(term)) score += 2;
     });
+    
     return { template, score };
   });
 
   const bestMatch = scoredTemplates.sort((a, b) => b.score - a.score)[0];
-  if (!bestMatch || bestMatch.score === 0) {
-    console.log("No exact matches found, using default template");
-    return availableTemplates[0].configuration;
+
+  if (bestMatch.score === 0) {
+    return {
+      code: availableTemplates[0].configuration,
+      explanation: "Using default template (no exact matches found)",
+      securityNotes: ["Please review and customize the generated code"]
+    };
   }
 
-  console.log(`Found matching template with score ${bestMatch.score}`);
-  return bestMatch.template.configuration;
+  return {
+    code: bestMatch.template.configuration,
+    explanation: `Generated from template matching "${bestMatch.template.resourceType}"`,
+    securityNotes: ["Please review and customize the generated code"]
+  };
 };
 
 // Add new GitHub workflow templates

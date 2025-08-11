@@ -1,69 +1,118 @@
-# Welcome to your Lovable project
+# IaC GPT — AI-Powered Infrastructure & Workflow Generator (SaaS)
 
-## Project info
+IaC GPT is a SaaS application that turns natural language into production‑ready Infrastructure as Code and CI/CD workflows. Generate Terraform, Kubernetes, Docker, CloudFormation, and Ansible configurations, plus GitHub Actions pipelines — in seconds.
 
-**URL**: https://lovable.dev/projects/d0fe0a98-41db-45dc-91d2-a0087dfed8e3
+- Generate secure, best‑practice IaC from plain English
+- Produce GitHub Workflows tailored to your tech stack
+- Copy, download, and integrate directly into your repos
+- Clean, structured UI with security notes and details
+- Pluggable AI backends (OpenAI or Gemini)
 
-## How can I edit this code?
+## Live App
 
-There are several ways of editing your application.
+- Live URL: <ADD_YOUR_PUBLIC_LINK_HERE>
+- Status page (optional): <ADD_STATUSPAGE_LINK_HERE>
 
-**Use Lovable**
+If you need hosting, you can deploy to Vercel, Netlify, or any static host. The app is a Vite + React SPA.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/d0fe0a98-41db-45dc-91d2-a0087dfed8e3) and start prompting.
+## Product Highlights
 
-Changes made via Lovable will be committed automatically to this repo.
+- Fast, structured generation with copy/download
+- Security considerations highlighted for each output
+- Config-type aware parsing and clean display (no raw JSON)
+- Loading overlay for responsive UX
+- Workflow configuration builder and testing scaffold
 
-**Use your preferred IDE**
+## Tech Stack
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- Vite + React + TypeScript
+- Tailwind CSS + shadcn/ui (Radix primitives)
+- React Router
+- TanStack Query (scaffolded)
+- OpenAI or Google Gemini via REST
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Getting Started (Local Development)
 
-Follow these steps:
+1) Prerequisites
+- Node.js >= 18 and npm
+- An AI provider API key:
+  - OpenAI: https://platform.openai.com/ (API Keys)
+  - Gemini: https://aistudio.google.com/ (Get API key)
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+2) Clone and install
+```bash
 git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+cd ai-cloud-architect
+npm install
 ```
 
-**Edit a file directly in GitHub**
+3) Environment variables
+Create a `.env.local` file in the project root. Choose ONE provider and fill values:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+OpenAI example:
+```env
+VITE_AI_PROVIDER=openai
+VITE_OPENAI_API_KEY=sk-xxxx
+VITE_OPENAI_BASE_URL=https://api.openai.com/v1
+VITE_OPENAI_MODEL=gpt-3.5-turbo
+VITE_MAX_TOKENS=2000
+VITE_ENABLE_DEBUG=true
+```
 
-**Use GitHub Codespaces**
+Gemini example:
+```env
+VITE_AI_PROVIDER=gemini
+VITE_GEMINI_API_KEY=AIzaSy...
+VITE_GEMINI_MODEL=gemini-2.0-flash
+VITE_MAX_TOKENS=4000
+VITE_ENABLE_DEBUG=true
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+4) Run the app
+```bash
+npm run dev
+```
+Open http://localhost:5173 (default Vite port).
 
-## What technologies are used for this project?
+## Usage
 
-This project is built with .
+- Select your configuration type (Terraform, Kubernetes, etc.)
+- Describe your infrastructure or workflow in plain English
+- Click Generate
+- Review explanation, security notes, and cost estimates (if available)
+- Copy or download the generated files
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Deployment
 
-## How can I deploy this project?
+Any static host will work:
+- Vercel
+- Netlify
+- Cloudflare Pages
+- GitHub Pages
 
-Simply open [Lovable](https://lovable.dev/projects/d0fe0a98-41db-45dc-91d2-a0087dfed8e3) and click on Share -> Publish.
+Build and upload the `dist` folder:
+```bash
+npm run build
+```
 
-## I want to use a custom domain - is that possible?
+## Security
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+- Never commit `.env.local` (gitignored)
+- Rotate keys regularly and apply provider-side quotas
+- Review generated IaC for your organization’s security policies
+
+## Roadmap
+
+- Multi‑file project scaffolding
+- One‑click PR to GitHub with generated artifacts
+- Provider‑specific cost estimation
+- Policy checks (OPA, tfsec, kube-score)
+- Template library and presets
+
+## License
+
+MIT — see `LICENSE`.
+
+---
+
+Made with ❤️ for DevOps and Platform teams.

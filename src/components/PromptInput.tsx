@@ -10,6 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { configService } from "@/services/configService";
+import { Badge } from "@/components/ui/badge";
+import { AlertCircle, CheckCircle, FileText } from "lucide-react";
 
 interface PromptInputProps {
   value: string;
@@ -28,6 +31,9 @@ export function PromptInput({
   onGenerate,
   isLoading
 }: PromptInputProps) {
+  const hasApiKey = !!configService.getApiKey();
+  const hasEnvApiKey = configService.hasEnvironmentApiKey();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onGenerate();
@@ -35,6 +41,26 @@ export function PromptInput({
 
   return (
     <Card className="p-4 bg-secondary/50">
+      <div className="flex items-center gap-2 mb-3">
+        <Badge variant={hasApiKey ? "default" : "destructive"} className="text-xs">
+          {hasApiKey ? (
+            <>
+              {hasEnvApiKey ? (
+                <FileText className="h-3 w-3 mr-1" />
+              ) : (
+                <CheckCircle className="h-3 w-3 mr-1" />
+              )}
+              {hasEnvApiKey ? "Env Key" : "Manual Key"}
+            </>
+          ) : (
+            <>
+              <AlertCircle className="h-3 w-3 mr-1" />
+              API Key Required
+            </>
+          )}
+        </Badge>
+      </div>
+      
       <form onSubmit={handleSubmit} className="flex gap-2">
         <Select value={configType} onValueChange={onConfigTypeChange}>
           <SelectTrigger className="w-[180px]">
@@ -54,9 +80,9 @@ export function PromptInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" disabled={isLoading || !hasApiKey}>
           <Wand2 className="mr-2 h-4 w-4" />
-          Generate
+          {isLoading ? "Generating..." : "Generate"}
         </Button>
       </form>
     </Card>

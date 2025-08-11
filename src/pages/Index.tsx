@@ -1,14 +1,14 @@
 
 import React, { useState } from "react";
-import { CodeEditor } from "@/components/CodeEditor";
 import { PromptInput } from "@/components/PromptInput";
 import { useToast } from "@/hooks/use-toast";
 import { GitHubConfig } from "@/components/GitHubConfig";
 import { WorkflowConfig } from "@/components/WorkflowConfig";
-import { AISettings } from "@/components/AISettings";
-import { generateInfrastructureCodeSmart } from "@/utils/generation";
+import { generateInfrastructureCode } from "@/utils/infrastructureUtils";
+import { configService } from "@/services/configService";
 import { Button } from "@/components/ui/button";
-import { 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
   Terminal,
   MessageSquarePlus,
   Github,
@@ -18,12 +18,20 @@ import {
   Zap,
   Code2,
   GitBranch,
-  Workflow
+  Workflow,
+  Shield,
+  DollarSign,
+  Download,
+  Copy,
+  CheckCircle,
+  AlertTriangle,
+  Info,
+  Loader2,
 } from "lucide-react";
+import { GeneratedOutput } from "@/components/GeneratedOutput";
 
 const Index = () => {
   const [prompt, setPrompt] = useState("");
-  const [code, setCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [configType, setConfigType] = useState("terraform");
   const [showGenerator, setShowGenerator] = useState(false);
@@ -33,6 +41,14 @@ const Index = () => {
   const [repository, setRepository] = useState("");
   const [workflowType, setWorkflowType] = useState("");
   const [workflowContent, setWorkflowContent] = useState("");
+  
+  // AI generation result state
+  const [generationResult, setGenerationResult] = useState<{
+    code: string;
+    explanation: string;
+    securityNotes: string[];
+    costEstimate?: string;
+  } | null>(null);
   
   const { toast } = useToast();
 
@@ -46,19 +62,32 @@ const Index = () => {
       return;
     }
 
+    const apiKey = configService.getApiKey();
+    if (!apiKey) {
+      toast({
+        title: "API Key Required",
+        description:
+          "Please configure your OpenAI API key to generate infrastructure code",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const generatedCode = await generateInfrastructureCodeSmart(prompt, configType);
-      setCode(generatedCode);
-      
+      const result = await generateInfrastructureCode(prompt, configType);
+      setGenerationResult(result);
       toast({
         title: "Infrastructure code generated",
-        description: "Review the generated code and make any necessary adjustments.",
+        description: result.explanation,
       });
     } catch (error) {
       toast({
         title: "Error generating code",
-        description: "An error occurred while generating the infrastructure code.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "An error occurred while generating the infrastructure code.",
         variant: "destructive",
       });
     } finally {
@@ -231,9 +260,23 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background p-6 animate-fade-in">
+      {/* Loading overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">
+              Generating infrastructure code...
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">Infrastructure & Workflow Generator</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Infrastructure & Workflow Generator
+          </h1>
           <p className="text-muted-foreground">
             Generate Infrastructure as Code and GitHub Workflows using AI
           </p>
@@ -249,8 +292,7 @@ const Index = () => {
               configType={configType}
               onConfigTypeChange={setConfigType}
             />
-            <AISettings />
-            
+
             <GitHubConfig
               organization={organization}
               onOrganizationChange={setOrganization}
@@ -259,6 +301,8 @@ const Index = () => {
               workflowType={workflowType}
               onWorkflowTypeChange={setWorkflowType}
             />
+
+            {/* AIConfig removed */}
           </div>
 
           <WorkflowConfig
@@ -269,11 +313,15 @@ const Index = () => {
           />
         </div>
 
-        <div className="h-[600px]">
+        {generationResult && (
+          <GeneratedOutput result={generationResult} configType={configType} />
+        )}
+
+        {/* Removed legacy CodeEditor box */}
+        {/* <div className="h-[600px]">
           <CodeEditor code={code} onChange={setCode} />
-        </div>
-        
-        {/* Add a simple attribution in the app view too */}
+        </div> */}
+
         <div className="text-center text-sm text-muted-foreground pt-4">
           Made by Yash Sharma
         </div>
