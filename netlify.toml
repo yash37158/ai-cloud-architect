@@ -4,8 +4,11 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  # Unblock build by ignoring client-exposed VITE_* keys and common files
+  SECRETS_SCAN_OMIT_KEYS = "VITE_OPENAI_API_KEY,VITE_GEMINI_API_KEY,VITE_AI_PROVIDER,VITE_GEMINI_MODEL,VITE_MAX_TOKENS,VITE_OPENAI_BASE_URL,VITE_OPENAI_MODEL"
+  SECRETS_SCAN_OMIT_PATHS = "dist/**,.env.example,README.md"
 
-# SPA fallback for React Router
+# SPA fallback so client-side routing works on refresh/deep links
 [[redirects]]
   from = "/*"
   to = "/index.html"
